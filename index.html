@@ -19,6 +19,7 @@
       font-size: 28px;
       font-weight: 700;
       color: #222;
+      text-align: center;
     }
 
     /* 카운트다운 카드 리스트 */
@@ -66,7 +67,7 @@
       box-shadow: 0 4px 10px rgba(0,0,0,0.05);
     }
 
-    /* FullCalendar 버튼 커스텀 */
+    /* FullCalendar 버튼 스타일 */
     .fc .fc-button {
       background: #0077cc;
       border: none;
@@ -95,48 +96,54 @@
 
   <script>
     const interviews = [
-    { name: 'KAIST 창의도전', date: '2025-10-17' },
-    { name: '성균관대학교', date: '2025-10-26' },
-    { name: 'GIST', start: '2025-10-30', end: '2025-11-01' },   // 10.30~10.31
-    { name: '고려대학교', date: '2025-11-02' },
-    { name: 'UNIST (특기자)', date: '2025-11-08' },
-    { name: '연세대학교', date: '2025-11-16' },
-    { name: 'DGIST', start: '2025-11-18', end: '2025-11-22' }, // 11.18~11.21
-    { name: '서울대학교', date: '2025-11-21' },
-    { name: '서울과학기술대학교', date: '2025-11-22' },
-    { name: '한양대학교 ERICA', date: '2025-11-22' },
-    { name: 'POSTECH', date: '2025-11-22' },
-    { name: 'POSTECH (반도체)', date: '2025-11-23' },
-    { name: 'KENTECH', date: '2025-11-24' },
-    { name: 'KAIST 일반전형', date: '2025-11-27' },
-    { name: '한양대학교', date: '2025-11-29' },
-    { name: '중앙대학교', start: '2025-11-29', end: '2025-12-01' },   // 11.29~11.30
-    { name: '경희대학교', start: '2025-11-29', end: '2025-12-01' },   // 11.29~11.30
-  ];
+      { name: 'KAIST 창의도전', date: '2025-10-17' },
+      { name: '성균관대학교', date: '2025-10-26' },
+      { name: 'GIST', start: '2025-10-30', end: '2025-11-01' },
+      { name: '고려대학교', date: '2025-11-02' },
+      { name: 'UNIST', date: '2025-11-08' },
+      { name: '연세대학교', date: '2025-11-16' },
+      { name: 'DGIST', start: '2025-11-18', end: '2025-11-22' },
+      { name: '서울대학교', date: '2025-11-21' },
+      { name: '서울과학기술대학교', date: '2025-11-22' },
+      { name: '한양대학교 ERICA', date: '2025-11-22' },
+      { name: 'POSTECH', date: '2025-11-22' },
+      { name: 'POSTECH (반도체)', date: '2025-11-23' },
+      { name: 'KENTECH', date: '2025-11-24' },
+      { name: 'KAIST 일반전형', date: '2025-11-27' },
+      { name: '한양대학교', date: '2025-11-29' },
+      { name: '중앙대학교', start: '2025-11-29', end: '2025-12-01' },
+      { name: '경희대학교', start: '2025-11-29', end: '2025-12-01' },
+    ];
 
     const today = new Date();
     const listEl = document.getElementById('countdown-list');
 
+    // countdown 카드 생성
     const sorted = interviews
       .map(item => {
-        const interviewDate = new Date(item.date);
+        const baseDate = item.date || item.start;
+        const interviewDate = new Date(baseDate);
         const diff = Math.ceil((interviewDate - today) / (1000 * 60 * 60 * 24));
         return { ...item, dday: diff };
       })
       .filter(item => item.dday >= 0)
-      .sort((a, b) => a.dday - b.dday);
+      .sort((a, b) => new Date(a.date || a.start) - new Date(b.date || b.start));
 
     sorted.forEach(item => {
       const li = document.createElement('li');
       li.className = "countdown-card";
+      const displayDate = item.date 
+        ? item.date 
+        : `${item.start} ~ ${new Date(new Date(item.end) - 1*24*60*60*1000).toISOString().slice(0,10)}`;
       li.innerHTML = `
         <div class="countdown-title">${item.name}</div>
-        <div class="countdown-date">${item.date}</div>
+        <div class="countdown-date">${displayDate}</div>
         <div class="countdown-dday">D-${item.dday}</div>
       `;
       listEl.appendChild(li);
     });
 
+    // FullCalendar 초기화
     document.addEventListener('DOMContentLoaded', function () {
       const calendarEl = document.getElementById('calendar');
       const calendar = new FullCalendar.Calendar(calendarEl, {
@@ -147,10 +154,13 @@
           center: 'title',
           right: 'dayGridMonth,listWeek'
         },
-        events: interviews.map(item => ({
-          title: item.name,
-          start: item.date,
-        })),
+        events: interviews.map(item => {
+          if(item.date) {
+            return { title: item.name, start: item.date };
+          } else {
+            return { title: item.name, start: item.start, end: item.end };
+          }
+        }),
       });
       calendar.render();
     });
@@ -158,4 +168,3 @@
 
 </body>
 </html>
-
