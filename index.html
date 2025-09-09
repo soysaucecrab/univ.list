@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <title>2025 면접 일정</title>
+  <!-- FullCalendar v5 CDN -->
+  <link href="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.css" rel="stylesheet" />
+  <script src="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.js"></script>
+
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      padding: 30px;
+      background: #f9f9fb;
+      color: #333;
+    }
+    h1 {
+      margin-bottom: 20px;
+      font-size: 28px;
+      font-weight: 700;
+      color: #222;
+    }
+
+    /* 카운트다운 카드 리스트 */
+    #countdown-list {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 15px;
+      padding: 0;
+      list-style: none;
+      margin-bottom: 30px;
+    }
+    .countdown-card {
+      background: #fff;
+      border-radius: 12px;
+      padding: 18px 20px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+    .countdown-card:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 6px 14px rgba(0,0,0,0.1);
+    }
+    .countdown-title {
+      font-size: 18px;
+      font-weight: 600;
+      margin-bottom: 8px;
+    }
+    .countdown-date {
+      font-size: 14px;
+      color: #666;
+    }
+    .countdown-dday {
+      margin-top: 10px;
+      font-weight: 600;
+      color: #0077cc;
+    }
+
+    /* 캘린더 컨테이너 */
+    #calendar {
+      max-width: 1000px;
+      margin: 0 auto;
+      background: #fff;
+      border-radius: 12px;
+      padding: 15px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+    }
+
+    /* FullCalendar 버튼 커스텀 */
+    .fc .fc-button {
+      background: #0077cc;
+      border: none;
+      border-radius: 8px;
+      padding: 6px 12px;
+      font-size: 14px;
+      font-weight: 500;
+      transition: background 0.2s;
+    }
+    .fc .fc-button:hover {
+      background: #005fa3;
+    }
+    .fc .fc-toolbar-title {
+      font-size: 18px;
+      font-weight: 600;
+      color: #222;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>📅 2025 면접 일정 & 남은 날짜</h1>
+  <ul id="countdown-list"></ul>
+
+  <div id="calendar"></div>
+
+  <script>
+    const interviews = [
+    { name: 'KAIST 창의도전', date: '2025-10-17' },
+    { name: '성균관대학교', date: '2025-10-26' },
+    { name: 'GIST', start: '2025-10-30', end: '2025-11-01' },   // 10.30~10.31
+    { name: '고려대학교', date: '2025-11-02' },
+    { name: 'UNIST', date: '2025-11-08' },
+    { name: '연세대학교', date: '2025-11-16' },
+    { name: 'DGIST', start: '2025-11-18', end: '2025-11-22' }, // 11.18~11.21
+    { name: '서울대학교', date: '2025-11-21' },
+    { name: '서울과학기술대학교', date: '2025-11-22' },
+    { name: '한양대학교 ERICA', date: '2025-11-22' },
+    { name: 'POSTECH', date: '2025-11-22' },
+    { name: 'POSTECH (반도체)', date: '2025-11-23' },
+    { name: 'KENTECH', date: '2025-11-24' },
+    { name: 'KAIST 일반전형', date: '2025-11-27' },
+    { name: '한양대학교', date: '2025-11-29' },
+    { name: '중앙대학교', start: '2025-11-29', end: '2025-12-01' },   // 11.29~11.30
+    { name: '경희대학교', start: '2025-11-29', end: '2025-12-01' },   // 11.29~11.30
+  ];
+
+    const today = new Date();
+    const listEl = document.getElementById('countdown-list');
+
+    const sorted = interviews
+      .map(item => {
+        const interviewDate = new Date(item.date);
+        const diff = Math.ceil((interviewDate - today) / (1000 * 60 * 60 * 24));
+        return { ...item, dday: diff };
+      })
+      .filter(item => item.dday >= 0)
+      .sort((a, b) => a.dday - b.dday);
+
+    sorted.forEach(item => {
+      const li = document.createElement('li');
+      li.className = "countdown-card";
+      li.innerHTML = `
+        <div class="countdown-title">${item.name}</div>
+        <div class="countdown-date">${item.date}</div>
+        <div class="countdown-dday">D-${item.dday}</div>
+      `;
+      listEl.appendChild(li);
+    });
+
+    document.addEventListener('DOMContentLoaded', function () {
+      const calendarEl = document.getElementById('calendar');
+      const calendar = new FullCalendar.Calendar(calendarEl, {
+        initialView: 'dayGridMonth',
+        locale: 'ko',
+        headerToolbar: {
+          left: 'prev,next today',
+          center: 'title',
+          right: 'dayGridMonth,listWeek'
+        },
+        events: interviews.map(item => ({
+          title: item.name,
+          start: item.date,
+        })),
+      });
+      calendar.render();
+    });
+  </script>
+
+</body>
+</html>
